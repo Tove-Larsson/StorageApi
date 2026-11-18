@@ -12,18 +12,19 @@ namespace StorageApi
 			builder.Services.AddDbContext<StorageApiContext>(options => options.UseSqlServer(connectionString));
 
 			builder.Services.AddControllers();
-			builder.Services.AddOpenApi();
+			//builder.Services.AddOpenApi();
 
+			builder.Services.AddEndpointsApiExplorer();
+			builder.Services.AddSwaggerGen();
 
 			var app = builder.Build();
 
 			if (app.Environment.IsDevelopment())
 			{
-				app.MapOpenApi();
-				app.UseSwaggerUI(options =>
-				{
-					options.SwaggerEndpoint("/openapi/v1.json", "StorageApi");
-				});
+				//app.MapOpenApi();
+
+				app.UseSwagger();
+				app.UseSwaggerUI();
 			}
 
 			app.UseHttpsRedirection();
