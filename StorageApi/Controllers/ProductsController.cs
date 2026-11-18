@@ -32,10 +32,19 @@ public class ProductsController : ControllerBase
 
     // GET: api/Product/5
     [HttpGet("{id}")]
-    public async Task<ActionResult<Product>> GetProduct(int id)
+    public async Task<ActionResult<ProductDto>> GetProduct(int id)
     {
-        var product = await _context.Product.FindAsync(id);
 
+        var product = await _context.Product
+            .Where(p => p.Id == id)
+            .Select(p => new ProductDto
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Price = p.Price,
+                Count = p.Count
+            }).FirstOrDefaultAsync();
+        
         if (product == null)
         {
             return NotFound();
@@ -78,12 +87,30 @@ public class ProductsController : ControllerBase
     // POST: api/Product
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPost]
-    public async Task<ActionResult<Product>> PostProduct(Product product)
+    public async Task<ActionResult<ProductDto>> PostProduct(CreateProductDto product)
     {
-        _context.Product.Add(product);
+        var entity = new Product
+        {
+            Name = product.Name,
+            Price = product.Price,
+            Category = product.Category,
+            Shelf = product.Shelf,
+            Count = product.Count,
+            Description = product.Description
+        };
+
+        _context.Product.Add(entity);
         await _context.SaveChangesAsync();
 
-        return CreatedAtAction("GetProduct", new { id = product.Id }, product);
+		var productDto = new ProductDto
+		{
+			Id = entity.Id,
+			Name = entity.Name,
+			Price = entity.Price,
+			Count = entity.Count
+		};
+
+		return CreatedAtAction("GetProduct", new { id = productDto.Id }, productDto);
     }
 
     // DELETE: api/Product/5

@@ -8,7 +8,7 @@
 		public string Category { get; set; }
 		public string Shelf { get; set; }
 		public int Count { get; set; }
-		public string Description { get; set; }
+		public string? Description { get; set; }
 
 
 	}
