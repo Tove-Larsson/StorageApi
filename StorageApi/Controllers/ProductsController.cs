@@ -13,11 +13,18 @@ public class ProductsController : ControllerBase
 		_context = context;
 	}
 
-	// GET: api/Product
+	// GET: api/Products
 	[HttpGet]
-	public async Task<ActionResult<IEnumerable<ProductDto>>> GetProduct()
+	public async Task<ActionResult<IEnumerable<ProductDto>>> GetProduct([FromQuery] string? category)
 	{
-		var products = await _context.Product
+		var query = _context.Product.AsQueryable();
+
+		if (!string.IsNullOrEmpty(category))
+		{
+			query = query.Where(p => p.Category == category);
+		}
+
+		var products = await query
 			.Select(p => new ProductDto
 			{
 				Id = p.Id,
@@ -29,6 +36,26 @@ public class ProductsController : ControllerBase
 
 		return products;
 	}
+
+	// GET: api/Products/stats
+	[HttpGet("stats")]
+	public async Task<ActionResult<ProductStatsDto>> GetStats()
+	{
+		var stats = new ProductStatsDto
+		{
+			TotalProducts = await _context.Product.CountAsync(),
+
+			// (long) prevents overflow on large stock values
+			TotalStockValue = await _context.Product
+				.SumAsync(p => (long)p.Price * p.Count),
+
+			AveragePrice = await _context.Product
+				.AverageAsync(p => (double?)p.Price) ?? 0
+		};
+
+		return Ok(stats);
+	}
+
 
 	// GET: api/Product/5
 	[HttpGet("{id}")]
