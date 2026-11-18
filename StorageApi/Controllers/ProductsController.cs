@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using StorageApi.Dto;
 using StorageApi.Models;
 
 [Route("api/[controller]")]
@@ -14,9 +15,19 @@ public class ProductsController : ControllerBase
 
     // GET: api/Product
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Product>>> GetProduct()
+    public async Task<ActionResult<IEnumerable<ProductDto>>> GetProduct()
     {
-        return await _context.Product.ToListAsync();
+        var products = await _context.Product
+            .Select(p => new ProductDto
+            {
+                Id = p.Id,
+                Name = p.Name,
+                Price = p.Price,
+                Count = p.Count,
+            })
+            .ToListAsync();
+
+        return products;
     }
 
     // GET: api/Product/5
